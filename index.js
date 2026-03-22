@@ -9,25 +9,50 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const client = new OpenAI({
+// 🔐 OpenAI config
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-app.post("/quiz", async (req, res) => {
-  try {
-    const { theme } = req.body;
+// 🧪 Route test
+app.get("/", (req, res) => {
+  res.send("Backend OK 🚀");
+});
 
-    const response = await client.responses.create({
-      model: "gpt-4.1-mini",
-      input: `Génère 5 questions de quiz sur ${theme} en JSON avec question, options et réponse.`,
+// 🧠 Route quiz
+app.get("/api/quiz", async (req, res) => {
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "Tu es une IA qui génère des quiz de football.",
+        },
+        {
+          role: "user",
+          content:
+            "Génère une question de quiz sur le football avec 4 choix et indique la bonne réponse au format JSON.",
+        },
+      ],
     });
 
-    res.json(response.output_text);
-  } catch (err) {
-  console.error(err); // 👈 IMPORTANT
-  res.status(500).json({ error: err.message });
+    const response = completion.choices[0].message.content;
 
+    res.json({
+      quiz: response,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: "Erreur serveur",
+    });
   }
 });
 
-app.listen(3000, () => console.log("Serveur lancé"));
+// 🌍 PORT (IMPORTANT POUR RENDER)
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Serveur lancé sur le port " + PORT);
+});
