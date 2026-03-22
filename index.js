@@ -56,13 +56,13 @@ app.get("/api/quiz", async (req, res) => {
       quiz: quiz,
     });
   } catch (error) {
-    console.error("Erreur API :", error.message);
+  console.error("ERREUR COMPLETE :", error);
 
-    res.status(500).json({
-      success: false,
-      error: "Erreur serveur",
-    });
-  }
+  res.status(500).json({
+    success: false,
+    error: error.message,
+  });
+}
 });
 
 // Port pour Render
